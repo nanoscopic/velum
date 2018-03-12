@@ -2,7 +2,7 @@
 
 # This script will setup the database and then start the rails application
 
-set -e
+set -euo pipefail
 
 : ${VELUM_PORT:=80}
 
