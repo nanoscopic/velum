@@ -7,20 +7,24 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-def seed_development
-  # nothing yet
-end
-
 def seed_production
+  # Ran for both production and developement environments
   Registry.where(name: "SUSE").find_or_initialize.tap do |r|
     r.url = "https://registry.suse.com"
     r.save
   end
 end
 
-case Rails.env
-when "test", "development"
-  seed_development
-when "production"
+def seed_development
+  # Ran after seed_production, only on development and test
+  # environments
+  # nothing yet
+end
+
+if ["production", "development"].include? Rails.env
   seed_production
+end
+
+if ["development", "test"].include? Rails.env
+  seed_development
 end
