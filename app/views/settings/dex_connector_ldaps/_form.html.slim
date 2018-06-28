@@ -1,7 +1,7 @@
 = form_for [:settings, @certificate_holder], html: { class: "dex-connectors-form"} do |f|
   .form-group class="#{error_class_for(@certificate_holder, :name)}"
     = f.label :name
-    = f.text_field :name, class: "form-control", value: @certificate_holder.name, required: true
+    = f.text_field :name, class: "form-control", value: @certificate_holder.name
     = error_messages_for(@certificate_holder, :name)
 
   hr
@@ -9,12 +9,12 @@
 
   .form-group class="#{error_class_for(@certificate_holder, :host)}"
     = f.label :host
-    = f.text_field :host, class: "form-control", value: @certificate_holder.host, required: true
+    = f.text_field :host, class: "form-control", value: @certificate_holder.host
     = error_messages_for(@certificate_holder, :host)
 
   .form-group class="#{error_class_for(@certificate_holder, :port)}"
     = f.label :port
-    = f.text_field :port, class: "form-control", value: @certificate_holder.port, required: true
+    = f.text_field :port, class: "form-control", value: @certificate_holder.port
     = error_messages_for(@certificate_holder, :port)
 
   .form-group class="#{error_class_for(@certificate_holder, :start_tls)}"
@@ -30,14 +30,14 @@
     = error_messages_for(@certificate_holder, :start_tls)
 
 
-  .form-group class="#{error_class_for(@certificate_holder, :certificate)}"
+  .form-group class="#{error_class_for(@cert, :certificate)}"
     = f.label :certificate
     p Paste the certificate for the LDAP server here.
     = f.text_area :certificate, value: @cert.certificate, class: "form-control", rows: 5, required: true
-    = error_messages_for(@certificate_holder, :certificate)
+    = error_messages_for(@cert, :certificate)
 
   br
-  p Authentication
+  h4 Authentication
 
   .form-group class="#{error_class_for(@certificate_holder, :bind_anon)}"
     = f.label :bind_anon, "Anonymous"
@@ -66,17 +66,17 @@
   h4 User Search
   .form-group class="#{error_class_for(@certificate_holder, :username_prompt)}"
     = f.label :username_prompt, "Username Prompt"
-    = f.text_field :username_prompt, class: "form-control", value: @certificate_holder.username_prompt, required: true
+    = f.text_field :username_prompt, class: "form-control", value: @certificate_holder.username_prompt
     = error_messages_for(@certificate_holder, :username_prompt)
 
   .form-group class="#{error_class_for(@certificate_holder, :user_base_dn)}"
     = f.label :user_base_dn, "Base DN"
-    = f.text_field :user_base_dn, class: "form-control", value: @certificate_holder.user_base_dn, required: true
+    = f.text_field :user_base_dn, class: "form-control", value: @certificate_holder.user_base_dn
     = error_messages_for(@certificate_holder, :user_base_dn)
 
   .form-group class="#{error_class_for(@certificate_holder, :user_filter)}"
     = f.label :user_filter, "Filter"
-    = f.text_field :user_filter, class: "form-control", value: @certificate_holder.user_filter, required: true
+    = f.text_field :user_filter, class: "form-control", value: @certificate_holder.user_filter
     = error_messages_for(@certificate_holder, :user_filter)
 
   br
@@ -84,22 +84,22 @@
 
   .form-group class="#{error_class_for(@certificate_holder, :user_attr_username)}"
     = f.label :user_attr_username, "Username"
-    = f.text_field :user_attr_username, class: "form-control", value: @certificate_holder.user_attr_username, required: true
+    = f.text_field :user_attr_username, class: "form-control", value: @certificate_holder.user_attr_username
     = error_messages_for(@certificate_holder, :user_attr_username)
 
   .form-group class="#{error_class_for(@certificate_holder, :user_attr_id)}"
     = f.label :user_attr_id, "ID"
-    = f.text_field :user_attr_id, class: "form-control", value: @certificate_holder.user_attr_id, required: true
+    = f.text_field :user_attr_id, class: "form-control", value: @certificate_holder.user_attr_id
     = error_messages_for(@certificate_holder, :user_attr_id)
 
   .form-group class="#{error_class_for(@certificate_holder, :user_attr_email)}"
     = f.label :user_attr_email, "Email"
-    = f.text_field :user_attr_email, class: "form-control", value: @certificate_holder.user_attr_email, required: true
+    = f.text_field :user_attr_email, class: "form-control", value: @certificate_holder.user_attr_email
     = error_messages_for(@certificate_holder, :user_attr_email)
 
   .form-group class="#{error_class_for(@certificate_holder, :user_attr_name)}"
     = f.label :user_attr_name, "Name"
-    = f.text_field :user_attr_name, class: "form-control", value: @certificate_holder.user_attr_name, required: true
+    = f.text_field :user_attr_name, class: "form-control", value: @certificate_holder.user_attr_name
     = error_messages_for(@certificate_holder, :user_attr_name)
 
   hr
@@ -107,12 +107,12 @@
 
   .form-group class="#{error_class_for(@certificate_holder, :group_base_dn)}"
     = f.label :group_base_dn, "Base DN"
-    = f.text_field :group_base_dn, class: "form-control", value: @certificate_holder.group_base_dn, required: true
+    = f.text_field :group_base_dn, class: "form-control", value: @certificate_holder.group_base_dn
     = error_messages_for(@certificate_holder, :group_base_dn)
 
   .form-group class="#{error_class_for(@certificate_holder, :group_filter)}"
     = f.label :group_filter, "Filter"
-    = f.text_field :group_filter, class: "form-control", value: @certificate_holder.group_filter, required: true
+    = f.text_field :group_filter, class: "form-control", value: @certificate_holder.group_filter
     = error_messages_for(@certificate_holder, :group_filter)
 
   br
@@ -120,17 +120,17 @@
 
   .form-group class="#{error_class_for(@certificate_holder, :group_attr_user)}"
     = f.label :group_attr_user, "User"
-    = f.text_field :group_attr_user, class: "form-control", value: @certificate_holder.group_attr_user, required: true
+    = f.text_field :group_attr_user, class: "form-control", value: @certificate_holder.group_attr_user
     = error_messages_for(@certificate_holder, :group_attr_user)
 
   .form-group class="#{error_class_for(@certificate_holder, :group_attr_group)}"
     = f.label :group_attr_group, "Group"
-    = f.text_field :group_attr_group, class: "form-control", value: @certificate_holder.group_attr_group, required: true
+    = f.text_field :group_attr_group, class: "form-control", value: @certificate_holder.group_attr_group
     = error_messages_for(@certificate_holder, :group_attr_group)
 
   .form-group class="#{error_class_for(@certificate_holder, :group_attr_name)}"
     = f.label :group_attr_name, "Name"
-    = f.text_field :group_attr_name, class: "form-control", value: @certificate_holder.group_attr_name, required: true
+    = f.text_field :group_attr_name, class: "form-control", value: @certificate_holder.group_attr_name
     = error_messages_for(@certificate_holder, :group_attr_name)
 
   .form-actions.clearfix

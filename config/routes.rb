@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     resources :auditing, only: [:index, :create]
     resources :system_certificates
     resources :dex_connector_ldaps, path: :ldap_connectors
+    resources :dex_connector_oidcs, path: :oidc_connectors
   end
 end
 # rubocop:enable Metrics/BlockLength

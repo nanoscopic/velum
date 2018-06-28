@@ -1,4 +1,5 @@
 require "velum/dex/ldap"
+require "velum/dex/oidc"
 
 # Serve the pillar information
 # rubocop:disable Metrics/ClassLength
@@ -68,6 +69,8 @@ class InternalApi::V1::PillarsController < InternalApiController
       ec2_cloud_contents
     when "azure"
       azure_cloud_contents
+    when "gce"
+      gce_cloud_contents
     else
       {}
     end
@@ -129,6 +132,21 @@ class InternalApi::V1::PillarsController < InternalApiController
     }
   end
 
+  def gce_cloud_contents
+    {
+      cloud: {
+        framework: "gce",
+        profiles:  {
+          cluster_node: {
+            size:       Pillar.value(pillar: :cloud_worker_type),
+            network:    Pillar.value(pillar: :cloud_worker_net),
+            subnetwork: Pillar.value(pillar: :cloud_worker_subnet)
+          }
+        }
+      }
+    }
+  end
+
   def openstack_cloud_contents
     {
       cloud: {
@@ -145,7 +163,8 @@ class InternalApi::V1::PillarsController < InternalApiController
           floating:       Pillar.value(pillar: :cloud_openstack_floating),
           subnet:         Pillar.value(pillar: :cloud_openstack_subnet),
           bs_version:     Pillar.value(pillar: :cloud_openstack_bs_version),
-          lb_mon_retries: Pillar.value(pillar: :cloud_openstack_lb_mon_retries)
+          lb_mon_retries: Pillar.value(pillar: :cloud_openstack_lb_mon_retries),
+          ignore_vol_az:  Pillar.value(pillar: :cloud_openstack_ignore_vol_az)
         }
       }
     }
@@ -174,6 +193,7 @@ class InternalApi::V1::PillarsController < InternalApiController
   def dex_connectors_as_pillar
     connectors = []
     connectors.concat(Velum::Dex.ldap_connectors_as_pillar)
+    connectors.concat(Velum::Dex.oidc_connectors_as_pillar)
     { dex: { connectors: connectors } }
   end
 end
