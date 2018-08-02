@@ -90,7 +90,7 @@ class Pillar < ApplicationRecord
         cloud_worker_type:
           "cloud:profiles:cluster_node:size",
         cloud_worker_subnet:
-          "cloud:profiles:cluster_node:network_interfaces:SubnetId",
+          "cloud:profiles:cluster_node:subnet",
         cloud_worker_security_group:
           "cloud:profiles:cluster_node:network_interfaces:SecurityGroupId",
         cloud_worker_net:
@@ -125,7 +125,9 @@ class Pillar < ApplicationRecord
         cloud_openstack_lb_mon_retries:
           "cloud:openstack:lb_mon_retries",
         cloud_openstack_bs_version:
-          "cloud:openstack:bs_version"
+          "cloud:openstack:bs_version",
+        cloud_openstack_ignore_vol_az:
+          "cloud:openstack:ignore_vol_az"
       }
     end
     # rubocop:enable Layout/AlignHash
