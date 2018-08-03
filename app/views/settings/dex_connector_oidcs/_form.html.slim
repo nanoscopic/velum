@@ -1,0 +1,48 @@
+= form_for [:settings, @data_holder], html: { class: "dex-connectors-form"} do |f|
+  .form-group class="#{error_class_for(@data_holder, :name)}"
+    = f.label :name
+    = f.text_field :name, class: "form-control", value: @data_holder.name, required: true
+    = error_messages_for(@data_holder, :name)
+
+  hr
+  h4 Provider
+
+  .form-group class="#{error_class_for(@data_holder, :provider_url)}"
+    = f.label :provider_url, "Endpoint URL"
+    = f.text_field :provider_url, class: "form-control", value: @data_holder.provider_url, required: true
+    = error_messages_for(@data_holder, :provider_url)
+    
+  .form-group class="#{error_class_for(@data_holder, :callback_url)}"
+    = f.label :callback_url, "Callback URL"
+    = f.text_field :callback_url, class: "form-control", value: @data_holder.callback_url, required: true
+    = error_messages_for(@data_holder, :callback_url)
+
+  form-group class="#{error_class_for(@data_holder, :basic_auth)}"
+    = f.label :basic_auth, "Basic Auth"
+    br
+    .btn-group.btn-group-toggle data-toggle="buttons"
+      = f.label :basic_auth, nil, class: "btn btn-default #{'btn-primary active' if @data_holder.basic_auth}"
+        = f.radio_button :basic_auth, "true", checked: @data_holder.basic_auth
+        | On
+      = f.label :basic_auth, nil, class: "btn btn-default #{'btn-primary active' unless @data_holder.basic_auth}"
+        = f.radio_button :basic_auth, "false", checked: !@data_holder.basic_auth
+        | Off
+    = error_messages_for(@data_holder, :basic_auth)
+    
+  hr
+  h4 Client
+  
+  .form-group class="#{error_class_for(@data_holder, :client_id)}"
+    = f.label :client_id, "ID"
+    = f.text_field :client_id, class: "form-control", value: @data_holder.client_id, required: true
+    = error_messages_for(@data_holder, :client_id)
+    
+  .form-group class="#{error_class_for(@data_holder, :client_secret)}"
+    = f.label :client_secret, "Secret"
+    = f.password_field :client_secret, class: "form-control", value: @data_holder.client_secret, required: true
+    = error_messages_for(@data_holder, :client_secret)
+
+  .form-actions.clearfix
+    = f.submit "Save", class: "btn btn-primary action"
+    = link_to "Cancel", settings_dex_connector_oidcs_path, class: "btn btn-default action"
+  
