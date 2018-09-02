@@ -42,5 +42,6 @@ FactoryGirl.define do
     group_attr_user "uid"
     group_attr_group "member"
     group_attr_name "name"
+    certificate "test"
   end
 end

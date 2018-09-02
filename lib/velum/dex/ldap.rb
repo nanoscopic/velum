@@ -5,8 +5,14 @@ module Velum
   module Dex
     class << self
       def ldap_connectors_as_pillar
-        ldap_connectors = DexConnectorLdap.all.map do |con|
-          {
+        ldap_connectors = []
+        DexConnectorLdap.all.map do |con|
+          cert = con.try(:certificate) || ""
+          if cert != ""
+            cert = "-----BEGIN CERTIFICATE-----\n" + cert + "\n-----END CERTIFICATE-----"
+            cert = Base64.encode64(cert)
+          end
+          ldap_connectors.push(
             type:            "ldap",
             id:              con.id,
             name:            con.name,
@@ -15,12 +21,12 @@ module Velum
             #   feed into a single line of config for dex
             server:          "#{con.host}:#{con.port}",
             start_tls:       con.start_tls,
-            root_ca_data:    Base64.encode64(con.certificate.try(:certificate) || ""),
+            root_ca_data:    cert,
             bind:            generate_bind_block(con), # Place basic bind information together
             user:            generate_user_block(con), # Place user stuff together
             group:           generate_group_block(con), # Place group stuff together
             username_prompt: con.username_prompt
-          }
+          )
         end
         ldap_connectors
       end

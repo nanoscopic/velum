@@ -9,7 +9,6 @@ describe "Feature: LDAP connector settings", js: true, order: :defined do
   let!(:dex_connector_ldap3) { create(:dex_connector_ldap) }
   let!(:admin_cert) { create(:certificate) }
   let(:admin_cert_text) { admin_cert.certificate.strip }
-  let(:admin_cert_file) { to_fixture_file(admin_cert.certificate, full_path: true) }
 
   before do
     setup_done
@@ -66,7 +65,7 @@ describe "Feature: LDAP connector settings", js: true, order: :defined do
       fill_in "Host", with: "ldaptest.com"
       fill_in "Port", with: "1234"
       fill_in "Identifying User Attribute", with: "pass"
-      attach_file "Certificate", admin_cert_file
+      fill_in "Certificate", with: admin_cert_text
       fill_in id: "dex_connector_ldap_bind_dn", with: "cn=admin,dc=ldaptest,dc=com"
       fill_in id: "dex_connector_ldap_bind_pw", with: "pass"
       fill_in id: "dex_connector_ldap_user_attr_username", with: "username"
@@ -99,7 +98,7 @@ describe "Feature: LDAP connector settings", js: true, order: :defined do
 
     it "shows an error message if model validation fails" do
       fill_in "Port", with: "AAA"
-      attach_file "Certificate", admin_cert_file
+      fill_in "Certificate", with: admin_cert_text
       fill_in "Password", with: "pass"
       fill_in "Identifying User Attribute", with: "pass"
       fill_in id: "dex_connector_ldap_bind_dn", with: "cn=admin,dc=ldaptest,dc=com"
@@ -121,7 +120,7 @@ describe "Feature: LDAP connector settings", js: true, order: :defined do
 
     it "allows a user to edit an ldap connector" do
       fill_in "Port", with: 626
-      attach_file "Certificate", admin_cert_file
+      fill_in "Certificate", with: admin_cert_text
       page.execute_script("$('#ldap_conn_save').removeProp('disabled')")
       click_button("Save")
 
@@ -130,7 +129,7 @@ describe "Feature: LDAP connector settings", js: true, order: :defined do
 
     it "shows an error message if model validation fails" do
       fill_in "Port", with: "AAA"
-      attach_file "Certificate", admin_cert_file
+      fill_in "Certificate", with: admin_cert_text
       page.execute_script("$('#ldap_conn_save').removeProp('disabled')")
       click_button("Save")
 

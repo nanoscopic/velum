@@ -4,9 +4,6 @@ RSpec.describe Settings::DexConnectorLdapsController, type: :controller do
   let(:user) { create(:user) }
   let(:certificate) { create(:certificate) }
   let(:certificate_text) { certificate.certificate.strip }
-  let(:certificate_file) do
-    fixture_file_upload(to_fixture_file(certificate.certificate), "application/x-x509-user-cert")
-  end
 
   before do
     setup_done
@@ -33,43 +30,14 @@ RSpec.describe Settings::DexConnectorLdapsController, type: :controller do
     it "assigns a new ldap dex connector to @certificate_holder" do
       expect(assigns(:certificate_holder)).to be_a_new(DexConnectorLdap)
     end
-
-    it "assigns a new certificate to @cert" do
-      expect(assigns(:cert)).to be_a_new(Certificate)
-    end
   end
 
   describe "GET #edit" do
     let!(:dex_connector_ldap) { create(:dex_connector_ldap) }
-    let!(:dex_connector_ldap_with_cert) { create(:dex_connector_ldap) }
-
-    context "without certificate" do
-      before do
-        get :edit, id: dex_connector_ldap.id
-      end
-
-      it "assigns dex_connector_ldap to @dex_connector_ldap" do
-        expect(assigns(:dex_connector_ldap)).not_to be_a_new(DexConnectorLdap)
-      end
-
-      it "assigns a new Certificate to @cert" do
-        expect(assigns(:cert)).to be_a_new(Certificate)
-      end
-    end
 
     context "with certificate" do
-      before do
-        CertificateService.create!(service:     dex_connector_ldap_with_cert,
-                                   certificate: certificate)
-        get :edit, id: dex_connector_ldap_with_cert.id
-      end
-
-      it "assigns dex_connector_ldap to @certificate_holder" do
-        expect(assigns(:certificate_holder)).not_to be_a_new(DexConnectorLdap)
-      end
-
-      it "assigns the existing certificate to @cert" do
-        expect(assigns(:cert)).not_to be_a_new(Certificate)
+      it "assigns the existing certificate to @certificate" do
+        expect(dex_connector_ldap.certificate).to eq("test")
       end
     end
 
@@ -96,7 +64,7 @@ RSpec.describe Settings::DexConnectorLdapsController, type: :controller do
                                             host:               "test.com",
                                             port:               389,
                                             start_tls:          false,
-                                            certificate:        certificate_file,
+                                            certificate:        certificate_text,
                                             bind_anon:          false,
                                             bind_dn:            "cn=admin,dc=example,dc=org",
                                             bind_pw:            "admin",
@@ -127,7 +95,7 @@ RSpec.describe Settings::DexConnectorLdapsController, type: :controller do
         expect(dex_connector_ldap.start_tls).to eq(false)
       end
       it "saves the correct certificate" do
-        expect(dex_connector_ldap.certificate.certificate).to eq(certificate_text)
+        expect(dex_connector_ldap.certificate).to eq(certificate_text)
       end
       it "saves the correct bind_anon value" do
         expect(dex_connector_ldap.bind_anon).to eq(false)
@@ -178,13 +146,8 @@ RSpec.describe Settings::DexConnectorLdapsController, type: :controller do
   end
 
   describe "PATCH #update" do
-    let!(:dex_connector_ldap) { create(:dex_connector_ldap) }
-
-    before do
-      CertificateService.create!(service: dex_connector_ldap, certificate: certificate)
-    end
-
     it "updates a ldap connector" do
+      dex_connector_ldap = create(:dex_connector_ldap)
       dex_connector_ldap_params = { name: "new name" }
       put :update, id: dex_connector_ldap.id, dex_connector_ldap: dex_connector_ldap_params
       expect(DexConnectorLdap.find(dex_connector_ldap.id).name).to eq("new name")

@@ -42,13 +42,11 @@
     small.form-text.text-muted 
       | When enabled use StartTLS otherwise TLS will be used
 
-  .form-group.form-group-certificate class="#{error_class_for(@cert, :certificate) if @cert.present?}"
+  .form-group.form-group-certificate class="#{error_class_for(@certificate_holder, :certificate)}"
     = f.label :certificate
-    p Upload the certificate of the root CA that issued the LDAP server certificate
-    = f.file_field :certificate, class: "form-control", required: @cert.present?
-    - if @cert.present?
-      = error_messages_for(@cert, :certificate)
-      = f.text_area :current_cert, class: "form-control", value: @cert.certificate, rows: 7, readonly: "readonly"
+    p Paste the certificate for the LDAP server here.
+    = f.text_area :certificate, value: @certificate_holder.certificate, class: "form-control", rows: 5, required: true
+    = error_messages_for(@certificate_holder, :certificate)
 
   br
   h4 Authentication
