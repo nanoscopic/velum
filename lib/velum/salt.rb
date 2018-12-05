@@ -129,6 +129,15 @@ module Velum
       [res, JSON.parse(res.body)]
     end
 
+    def self.apply_state(targets: "*", state:)
+      res = perform_request(endpoint: "/run", method: "post",
+                            data: { client: "local",
+                                    fun: "state.apply",
+                                    tgt: targets,
+                                    arg: state })
+      [res, JSON.parse(res.body)]
+    end
+
     # Returns the contents of the given file.
     def self.read_file(targets: "*", target_type: "glob", file: nil)
       _, data = Velum::Salt.call action:      "cmd.run",

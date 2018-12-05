@@ -9,6 +9,8 @@ aside.settings-sidebar-section
       = link_to "System wide certificates", settings_system_certificates_path
   h5.title External Authentication
   ul.list
+    li class="#{active_class?(settings_auth_config_index_path?)}"
+      = link_to "Group Settings", settings_auth_config_index_path
     li class="#{active_class?(settings_dex_connector_ldaps_path?)}"
       = link_to "LDAP Servers", settings_dex_connector_ldaps_path
     li class="#{active_class?(settings_dex_connector_oidcs_path?)}"
