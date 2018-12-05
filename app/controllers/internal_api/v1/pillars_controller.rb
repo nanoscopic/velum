@@ -17,11 +17,21 @@ class InternalApi::V1::PillarsController < InternalApiController
       system_certificate_contents
     ).deep_merge(
       dex_connectors_as_pillar
+    ).merge(
+      raw_pillar_contents
     )
   end
 
   private
 
+  def raw_pillar_contents
+    raw_pillars = {}
+    Pillar.simple_pillars.each do |k, v|
+      raw_pillars[v] = Pillar.value(pillar: k.to_sym) unless Pillar.value(pillar: k.to_sym).nil?
+    end
+    { raw_pillars: raw_pillars }
+  end
+  
   def pillar_contents
     pillar_struct = {}.tap do |h|
       Pillar.simple_pillars.each do |k, v|
