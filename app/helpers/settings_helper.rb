@@ -24,6 +24,10 @@ module SettingsHelper
     request.fullpath.starts_with?(settings_system_certificates_path)
   end
 
+  def settings_auth_config_index_path?
+    request.fullpath.starts_with?(settings_auth_config_index_path)
+  end
+
   def settings_dex_connector_ldaps_path?
     request.fullpath.starts_with?(settings_dex_connector_ldaps_path)
   end

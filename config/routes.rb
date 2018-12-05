@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     resources :auditing, only: [:index, :create]
     resources :system_certificates
     resources :ldap_test
+    resources :auth_config, only: [:index, :create]
     resources :dex_connector_ldaps, path: :ldap_connectors
   end
 end

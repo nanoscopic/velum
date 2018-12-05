@@ -24,14 +24,14 @@ class User < ApplicationRecord
                 ])
   end
 
+  def ldap_config
+    @ldap_config ||= Velum::LDAP.ldap_config
+  end
+
   private
 
   def ldap
     @ldap ||= ldap_connection
-  end
-
-  def ldap_config
-    @ldap_config ||= Velum::LDAP.ldap_config
   end
 
   def current_password
@@ -183,6 +183,48 @@ class User < ApplicationRecord
     result = ldap.add(dn: user_dn.to_s, attributes: attrs)
     op_msg = ldap.get_operation_result.message
     msg = "Unable to create Person in LDAP: #{op_msg}"
+    Velum::LDAP.fail_if_with(result, msg)
+  end
+
+  def self.update_ldap_admin_group_name( oldName, newName )
+    ldap_config = Velum::LDAP.ldap_config
+    
+    conn_params = {
+      host: ldap_config["host"],
+      port: ldap_config["port"],
+      auth: {
+        method:   :simple,
+        username: ldap_config["admin_user"],
+        password: ldap_config["admin_password"]
+      }
+    }
+
+    Velum::LDAP.configure_ldap_tls!(ldap_config, conn_params)
+
+    ldap = Net::LDAP.new(**conn_params)
+    
+    treebase = ldap_config["tree_base"]
+    self.delete_ldap_group( ldap, treebase, oldName )
+    self.create_ldap_group( ldap, treebase, newName )
+  end
+
+  def self.delete_ldap_group( ldap, treebase, groupName )
+    result = ldap.delete( :dn => "cn=#{groupName},#{treebase}")
+  end
+
+  def self.create_ldap_group( ldap, treebase, groupName )
+    #uid = email[0, email.index("@")]
+    uid = "test"
+    
+    attrs = {
+      cn:           "cn=#{groupName}",
+      objectclass:  ["top", "groupOfUniqueNames"],
+      uniqueMember: "uid=#{uid},#{treebase}"
+    }
+    dn = "cn=#{groupName},#{treebase}"
+    result = ldap.add( :dn => dn, :attributes => attrs )
+    op_msg = ldap.get_operation_result.message
+    msg = "DN: #{dn} Unable to create Group organizational unit in LDAP: #{op_msg}"
     Velum::LDAP.fail_if_with(result, msg)
   end
   # rubocop:enable AbcSize,CyclomaticComplexity,MethodLength,PerceivedComplexity
