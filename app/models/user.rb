@@ -217,9 +217,9 @@ class User < ApplicationRecord
     uid = "test"
     
     attrs = {
-      cn:           "cn=#{groupName}",
+      cn:           "cn=#{groupName},ou=Groups",
       objectclass:  ["top", "groupOfUniqueNames"],
-      uniqueMember: "uid=#{uid},#{treebase}"
+      uniqueMember: "uid=#{uid},ou=People,#{treebase}"
     }
     dn = "cn=#{groupName},#{treebase}"
     result = ldap.add( :dn => dn, :attributes => attrs )
