@@ -21,7 +21,7 @@
   # Can have multiple values, must match all to be authorized
   required_groups:
     # If only a group name is given, membership will be checked against "uniqueMember"
-    - <%= ENV["LDAP_ADMIN_GROUP_DN"] || "cn=Administrators,ou=Groups,dc=infra,dc=caasp,dc=local" %>
+    - <%= ENV["LDAP_ADMIN_GROUP_DN"] || "cn=AdministratorsDefault,ou=Groups,dc=infra,dc=caasp,dc=local" %>
   ## Requires config.ldap_check_attributes in devise.rb to be true
   ## Can have multiple attributes and values, must match all to be authorized
   require_attribute:
