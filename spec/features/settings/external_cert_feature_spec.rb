@@ -17,7 +17,7 @@ describe "Feature: External Cerificate settings", js: true do
   let(:key_b) { File.join(fixture_path, "external_certs/b.key") }
 
   # *** Following sets of certs and keys are valid except for the stated ways ***
-  
+
   # Malformed. Both are malformed
   let(:crt_malformed) { File.join(fixture_path, "external_certs/malformed.crt") }
   let(:key_malformed) { File.join(fixture_path, "external_certs/malformed.key") }
@@ -34,13 +34,59 @@ describe "Feature: External Cerificate settings", js: true do
   let(:crt_sha1) { File.join(fixture_path, "external_certs/sha1_digest.crt") }
   let(:key_sha1) { File.join(fixture_path, "external_certs/sha1_digest.key") }
 
+  # CAs for chain validation
+  let(:crt_root) { File.join(fixture_path, "external_certs/ca_root.crt") }
+  let(:crt_intermed) { File.join(fixture_path, "external_certs/ca_intermed.crt") }
+
   before do
     setup_done
     login_as user, scope: :user
   end
 
-  describe "#index" do
+  describe "#index with invalid chain" do
     before do
+      visit settings_external_cert_index_path
+    end
+
+    it "fails without CAs being set system wide" do
+      attach_file("external_certificate_velum_cert", crt_a)
+      attach_file("external_certificate_velum_key", key_a)
+
+      click_button("Save")
+      expect(page).to have_http_status(:success)
+      expect(page).to have_content("Certificate verification failed")
+    end
+    
+    it "fails with only the root CA" do
+      visit settings_system_certificates_path
+
+      post :create, system_certificate: { name: "root", certificate: crt_root }
+      system_certificate = SystemCertificate.find_by(name: "root")
+      expect(system_certificate.name).to eq("root")
+
+      visit settings_external_cert_index_path
+
+      attach_file("external_certificate_velum_cert", crt_a)
+      attach_file("external_certificate_velum_key", key_a)
+
+      click_button("Save")
+      expect(page).to have_http_status(:success)
+      expect(page).to have_content("Certificate verification failed")
+    end
+  end
+
+  describe "#index with valid chain" do
+    before do
+      visit settings_system_certificates_path
+
+      post :create, system_certificate: { name: "root", certificate: crt_root }
+      system_certificate = SystemCertificate.find_by(name: "root")
+      expect(system_certificate.name).to eq("root")
+
+      post :create, system_certificate: { name: "intermed", certificate: crt_intermed }
+      system_certificate = SystemCertificate.find_by(name: "intermed")
+      expect(system_certificate.name).to eq("intermed")
+
       visit settings_external_cert_index_path
     end
 
