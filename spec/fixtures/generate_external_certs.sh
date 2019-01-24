@@ -241,6 +241,7 @@ create_site_crt badalt  intermed2 sha256 2048 expired "/CN=badalt$SITE_SUBJ" tes
 
 cp $DIR_CERTS/ca_root.crt external_certs/ca_root.crt
 cp $DIR_CERTS/ca_intermed.crt external_certs/ca_intermed.crt
+cp $DIR_CERTS/ca_intermed2.crt external_certs/ca_intermed2.crt
 
 cp $DIR_CERTS/site_a.crt external_certs/a.crt
 cp $DIR_CERTS/site_b.crt external_certs/b.crt

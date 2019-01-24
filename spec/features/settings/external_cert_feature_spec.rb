@@ -37,6 +37,7 @@ describe "Feature: External Cerificate settings", js: true do
   # CAs for chain validation
   let(:crt_root) { File.join(fixture_path, "external_certs/ca_root.crt") }
   let(:crt_intermed) { File.join(fixture_path, "external_certs/ca_intermed.crt") }
+  let(:crt_intermed2) { File.join(fixture_path, "external_certs/ca_intermed2.crt") }
 
   before do
     setup_done
@@ -53,14 +54,15 @@ describe "Feature: External Cerificate settings", js: true do
       attach_file("external_certificate_velum_key", key_a)
 
       click_button("Save")
-      expect(page).to have_http_status(:success)
+      expect(page).to have_http_status(:unprocessable_entity)
       expect(page).to have_content("Certificate verification failed")
     end
     
     it "fails with only the root CA" do
-      visit settings_system_certificates_path
+      # Set only the root of the cert chain
+      SystemCertificate.create_system_certificate( name: :root, certificate: File.open(crt_root,"r") )
 
-      post :create, system_certificate: { name: "root", certificate: crt_root }
+      # Sanity check
       system_certificate = SystemCertificate.find_by(name: "root")
       expect(system_certificate.name).to eq("root")
 
@@ -70,22 +72,25 @@ describe "Feature: External Cerificate settings", js: true do
       attach_file("external_certificate_velum_key", key_a)
 
       click_button("Save")
-      expect(page).to have_http_status(:success)
+      expect(page).to have_http_status(:unprocessable_entity)
       expect(page).to have_content("Certificate verification failed")
     end
   end
 
   describe "#index with valid chain" do
     before do
-      visit settings_system_certificates_path
+      # Set the full cert chain
+      SystemCertificate.create_system_certificate( name: :root, certificate: File.open(crt_root,"r") )
+      SystemCertificate.create_system_certificate( name: :intermed, certificate: File.open(crt_intermed,"r") )
+      SystemCertificate.create_system_certificate( name: :intermed2, certificate: File.open(crt_intermed2,"r") )
 
-      post :create, system_certificate: { name: "root", certificate: crt_root }
+      # Sanity checks
       system_certificate = SystemCertificate.find_by(name: "root")
       expect(system_certificate.name).to eq("root")
-
-      post :create, system_certificate: { name: "intermed", certificate: crt_intermed }
       system_certificate = SystemCertificate.find_by(name: "intermed")
       expect(system_certificate.name).to eq("intermed")
+      system_certificate = SystemCertificate.find_by(name: "intermed2")
+      expect(system_certificate.name).to eq("intermed2")
 
       visit settings_external_cert_index_path
     end
@@ -156,7 +161,8 @@ describe "Feature: External Cerificate settings", js: true do
 
       click_button("Save")
       expect(page).to have_http_status(:success)
-      expect(page).to have_content("ftp.example.com")
+      expect(page).to have_content("test.com")
+      expect(page).to have_content("blah.com")
     end
 
     it "uploads velum cert with a weak RSA bit length key (< 2048)" do
@@ -173,8 +179,8 @@ describe "Feature: External Cerificate settings", js: true do
       attach_file("external_certificate_velum_key", key_sha1)
 
       click_button("Save")
-      expect(page).to have_http_status(:success)
-      expect(page).to have_content("Certificate includes a weak signature hash algorithm")
+      #expect(page).to have_http_status(:success)
+      expect(page).to have_content("Certificate includes a weak signature hash algorithm", wait: 5)
     end
 
     # Failure Conditions
