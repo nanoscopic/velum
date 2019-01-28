@@ -62,3 +62,31 @@ end
 def to_file_fixture_name(content)
   File.basename(to_file_fixture(content))
 end
+
+def mark_oldpage(page)
+  page.execute_script("var a=document.createElement('div');a.className='oldPage';var b=document.createTextNode('oldPage');a.appendChild(b);document.body.appendChild(a);")
+end
+
+def wait_oldpage_gone(page)
+  #Timeout.timeout(5) do
+  begin
+    if page.find("div.oldPage", wait:1)
+    else
+      return
+    end
+    ok = 0
+    5.times do
+      if page.find("div.oldPage", wait:1)
+        sleep 1
+        next
+      else
+        ok=1
+        break
+      end
+    end
+    if ok == 0
+      raise "Page did not change"
+    end
+  rescue Capybara::ElementNotFound
+  end
+end

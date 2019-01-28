@@ -169,7 +169,10 @@ describe "Feature: External Cerificate settings", js: true do
       attach_file("external_certificate_velum_cert", crt_weak)
       attach_file("external_certificate_velum_key", key_weak)
 
+      mark_oldpage(page)
       click_button("Save")
+      wait_oldpage_gone(page)
+
       expect(page).to have_http_status(:success)
       expect(page).to have_content("RSA key bit length should be greater than or equal to 2048")
     end
@@ -178,8 +181,11 @@ describe "Feature: External Cerificate settings", js: true do
       attach_file("external_certificate_velum_cert", crt_sha1)
       attach_file("external_certificate_velum_key", key_sha1)
 
+      mark_oldpage(page)
       click_button("Save")
-      #expect(page).to have_http_status(:success)
+      wait_oldpage_gone(page)
+
+      expect(page).to have_http_status(:success)
       expect(page).to have_content("Certificate includes a weak signature hash algorithm", wait: 5)
     end
 
