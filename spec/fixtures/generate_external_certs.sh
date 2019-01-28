@@ -68,7 +68,14 @@ function append_altnames() { # $1 altnames, $2 filename
   do
       echo "DNS.$(($index+1)) = ${altnames[index]}" >> $2
   done
-  echo -e "\n">>$2
+}
+
+function append_ip_altnames() { # $1 altnames, $2 filename
+  IFS='-' read -r -a altnames <<< "$1"
+  for index in "${!altnames[@]}"
+  do
+      echo "IP.$(($index+1)) = ${altnames[index]}" >> $2
+  done
 }
 
 function site_request_conf() { # $1 file, $2 bits
@@ -101,7 +108,7 @@ function gen_start_end() { # $1 good/expired
   fi
 }
 
-function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits, $5 good/expired, $6 subject, $7 altnames
+function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits, $5 good/expired, $6 subject, $7 altnames, $8 ipaltnames
   echo "Generating site key \"$1\""
   openssl genrsa -out $DIR_KEYS/site_$1.key $4 2>/dev/null
   
@@ -109,7 +116,8 @@ function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits,
   
   FILE=/tmp/ca_gen/site_$1.req.conf
   site_request_conf $FILE $4
-  append_altnames $7 $FILE
+  if [ "$7" != "0" ]; then append_altnames    $7 $FILE; fi
+  if [ "$8" != "0" ]; then append_ip_altnames $8 $FILE; fi
   
   openssl req -new -sha256 -key $DIR_KEYS/site_$1.key -subj "$6" -out $CSR_DIR/site_$1.csr -config $FILE
   # It is possible to specify altnames the following way instead of constructing a conf file.
@@ -123,7 +131,7 @@ function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits,
   #  -out $CSR_DIR/site_$1.csr
   
   # Cleanest way to see the actual contents of the CSR to verify it was created correctly.
-  # openssl req -in $CSR_DIR/site_$1.csr -text -noout
+  #openssl req -in $CSR_DIR/site_$1.csr -text -noout
   
   # Unclean very raw way to see the contents of the CSR
   # openssl asn1parse < $CSR_DIR/site_$1.csr
@@ -134,7 +142,8 @@ function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits,
   # It ignores them. They have to be re-specified. It may be pointless to specify them in the CSR as a result.
   # The altnames can be copied from the request potentially, by using the "copy_extensions = copy" option of openssl conf
   cp $DIR_CONF/ca_$2.conf $DIR_CONF/site_$1.conf
-  append_altnames $7 $DIR_CONF/site_$1.conf
+  if [ "$7" != "0" ]; then append_altnames    $7 $DIR_CONF/site_$1.conf; fi
+  if [ "$8" != "0" ]; then append_ip_altnames $8 $DIR_CONF/site_$1.conf; fi
   
   openssl ca -batch \
     -config $DIR_CONF/site_$1.conf \
@@ -145,7 +154,7 @@ function create_site_crt() { # $1 domain, $2 ca, $3 message_digest, $4 rsa_bits,
     -infiles $CSR_DIR/site_$1.csr
 }
 
-function create_site_crt_selfsigned() { # $1 domain, $2 message_digest, $3 rsa_bits, $4 good/expired, $5 subject, $6 altnames
+function create_site_crt_selfsigned() { # $1 domain, $2 message_digest, $3 rsa_bits, $4 good/expired, $5 subject, $6 altnames, $7 ipaltnames
   echo "Generating site key \"$1\""
   openssl genrsa -out $DIR_KEYS/site_$1.key $3 2>/dev/null
   
@@ -153,7 +162,8 @@ function create_site_crt_selfsigned() { # $1 domain, $2 message_digest, $3 rsa_b
 
   FILE=/tmp/ca_gen/site_$1.req.conf
   site_request_conf $FILE $3
-  append_altnames $6 $FILE
+  if [ "$6" != "0" ]; then append_altnames    $6 $FILE; fi
+  if [ "$7" != "0" ]; then append_ip_altnames $7 $FILE; fi
   
   openssl rsa -in $DIR_KEYS/site_$1.key -out $DIR_KEYS/site_rsa_$1.key
   openssl req -new -sha256 -key $DIR_KEYS/site_$1.key -subj "$5" -out $CSR_DIR/site_$1.csr -config $FILE
@@ -164,7 +174,8 @@ function create_site_crt_selfsigned() { # $1 domain, $2 message_digest, $3 rsa_b
   # full config file that I see.
   #echo -e "[req_ext]\nsubjectAltName = @alt_names\n" >> conf/site_$1.conf
   #echo -e "[alt_names]" >> conf/site_$1.conf
-  append_altnames $6 $DIR_CONF/site_$1.conf
+  if [ "$6" != "0" ]; then append_altnames    $6 $DIR_CONF/site_$1.conf; fi
+  if [ "$7" != "0" ]; then append_ip_altnames $7 $DIR_CONF/site_$1.conf; fi
   
   gen_start_end $4
   
@@ -227,17 +238,18 @@ EOL
 
 SITE_SUBJ="/ST=WA/O=Test/OU=Test Unit/CN=test.com"
 SITE_ALTNAMES=test.com-blah.com
+SITE_IP_ALTNAMES=127.0.0.1-13::17
 
 init
 init_root_ca    root               "/CN=US/O=US/OU=US Unit"
 init_sub_ca     intermed root      "/CN=US2/O=US2/OU=US2 Unit"
 init_sub_ca     intermed2 intermed "/CN=US3/O=US3/OU=US3 Unit"
-create_site_crt a       intermed2 sha256 2048 good    "/CN=a$SITE_SUBJ" $SITE_ALTNAMES
-create_site_crt b       intermed2 sha256 2048 good    "/CN=b$SITE_SUBJ" $SITE_ALTNAMES
-create_site_crt weak    intermed2 sha256 1024 good    "/CN=weak$SITE_SUBJ" $SITE_ALTNAMES
-create_site_crt sha1    intermed2 sha1   2048 good    "/CN=sha1$SITE_SUBJ" $SITE_ALTNAMES
-create_site_crt expired intermed2 sha256 2048 expired "/CN=expired$SITE_SUBJ" $SITE_ALTNAMES
-create_site_crt badalt  intermed2 sha256 2048 expired "/CN=badalt$SITE_SUBJ" test.com-blah.com
+create_site_crt a       intermed2 sha256 2048 good    "/CN=a$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
+create_site_crt b       intermed2 sha256 2048 good    "/CN=b$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
+create_site_crt weak    intermed2 sha256 1024 good    "/CN=weak$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
+create_site_crt sha1    intermed2 sha1   2048 good    "/CN=sha1$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
+create_site_crt expired intermed2 sha256 2048 expired "/CN=expired$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
+create_site_crt badalt  intermed2 sha256 2048 expired "/CN=badalt$SITE_SUBJ" $SITE_ALTNAMES $SITE_IP_ALTNAMES
 
 cp $DIR_CERTS/ca_root.crt external_certs/ca_root.crt
 cp $DIR_CERTS/ca_intermed.crt external_certs/ca_intermed.crt
